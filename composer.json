@@ -1,6 +1,7 @@
 {
     "name": "projectsimply/ps-forms",
     "description": "A very simply development platform for quick n simple ajax forms",
+    "type": "wordpress-plugin",
     "require": {
         "php": ">=5.4.0"
     }
