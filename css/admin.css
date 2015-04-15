@@ -1,0 +1,62 @@
+.button-remove {
+	background: url(../assets/sprite.png) -66px -49px no-repeat #fff;
+	height: 18px;
+	width: 18px;
+	display: block;
+	border-radius: 9px;
+	box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+	visibility:hidden;
+}
+
+.rule_row:hover .button-remove {
+	visibility: visible;
+}
+
+.button-remove:hover {
+	background-position: -66px -99px;
+}
+
+input[type="submit"].ps-forms-button {
+	display: block;
+	border-radius: 3px;
+	border: #21759B solid 1px;
+	border-color: #21759B #21759B #1E6A8D;
+	background: #21759B;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#2A95C5), to(#21759B));
+	background-image: -webkit-linear-gradient(top, #2A95C5, #21759B);
+	background-image: -moz-linear-gradient(top, #2A95C5, #21759B);
+	background-image: -o-linear-gradient(top, #2A95C5, #21759B);
+	background-image: linear-gradient(to bottom, #2A95C5, #21759B);
+	color: #FFFFFF;
+	font-weight: normal;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+	font-size: 13px;
+	line-height: 1em;
+	padding: 6px 11px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(120, 200, 230, 0.5) inset;
+	cursor: pointer;
+	position: relative;
+	text-align: center;
+	text-decoration: none;
+}
+
+#ps_forms_settings, #ps_submission_settings, #ps_default_validation_messages {
+	margin-bottom: 15px;
+}
+
+#ps-form-entry {
+	width:100%;
+	font-size:1.2em;
+}
+
+#ps-form-entry tr {
+	background: #eee;
+}
+
+#ps-form-entry tr.data-table-row-alt {
+	background: #ddd;
+}
+
+#ps-form-entry td {
+	padding: 5px;
+}

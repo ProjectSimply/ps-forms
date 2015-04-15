@@ -1,0 +1,7 @@
+{
+    "name": "projectsimply/ps-forms",
+    "description": "A very simply development platform for quick n simple ajax forms",
+    "require": {
+        "php": ">=5.4.0"
+    }
+}
