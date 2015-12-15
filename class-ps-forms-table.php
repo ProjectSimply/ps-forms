@@ -29,10 +29,20 @@ class Ps_forms_table extends WP_List_Table {
 	protected $data = array();
 	protected $total_items = 0;
 	protected $form_name = 0;
+	protected $screen;
 
 	public function __construct($form_name='') {
 
 		$this->form_name = $form_name;
+
+		$args = wp_parse_args( $args, array(
+			'plural' => '',
+			'singular' => '',
+			'ajax' => false,
+			'screen' => null,
+		) );
+
+		$this->screen = convert_to_screen( $args['screen'] );
 
 	}
 
@@ -100,6 +110,13 @@ class Ps_forms_table extends WP_List_Table {
 		) );
 
 		//The pagination links are automatically built according to those parameters
+
+	}
+
+
+	public function get_columns() {
+
+
 
 	}
 
