@@ -400,7 +400,7 @@ class Ps_forms {
 		//These are temporary. Need to be settings
 		$validation_error_message = "Sorry, some fields have yet to be filled in correctly.";
 		$error_message = "Oops, there was an error saving this form.";
-		$success_message = "Thank you for making an enquiry with The Sharp Project. We will be in touch very soon but please note that a booking is not confirmed until you receive an email stating so.";
+		$success_message = "Thank you for making an enquiry with us. We will be in touch very soon.";
 		$too_soon_message = "You've already submitted, please wait a minute before resubmitting.";
 
 		//Validation messages. 
