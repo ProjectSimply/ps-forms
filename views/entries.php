@@ -44,7 +44,7 @@
 	<?php endif; ?>
 
 
-	<a href="<?php echo admin_url('?page=ps-form-entries&form_name='. stripslashes($_GET['form_name']) .'&csv=1' ) ?>">Download CSV</a>
+	<a style="margin:20px 0;" class="button-primary" href="<?php echo admin_url('?page=ps-form-entries&form_name='. stripslashes($_GET['form_name']) .'&csv=1' ) ?>">Download CSV</a>
 
 
 	<form id="ps-entries-form-main" method="post">

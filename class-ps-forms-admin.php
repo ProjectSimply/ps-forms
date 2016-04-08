@@ -54,10 +54,10 @@ class Ps_forms_admin {
 			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 			header("Cache-Control: private", false);
 			header("Content-Type: application/octet-stream");
-			header("Content-Disposition: attachment; filename=\"report.csv\";" );
+			header("Content-Disposition: attachment; filename=\"" . $_GET['form_name'] . " report.csv\";" );
 			header("Content-Transfer-Encoding: binary");
 
-			echo $csv; die;
+			echo $csv['headers'] . $csv['csv']; die;
 
 		}
 
@@ -188,35 +188,33 @@ class Ps_forms_admin {
 		
 		$result = $wpdb->get_results($query);
 
-		$this->data = array();
-		$this->columns = array('submitted'=>'Submitted');
+		$data = array();
+		$columns = array('submitted'=>'Submitted');
 
 		foreach($result as $row) : 
 
 			$name = $row->name;
 			$date = new DateTime($row->time);
 			$data[$row->submit_id]['submitted'] 		= $date->format('d-m-Y \a\t H:i');
-			$data[$row->submit_id]['submit_id'] 		= $row->submit_id;
 			$data[$row->submit_id][$name]	 			= $row->value;
-			if(sizeof($this->columns) < 7)
-				$this->columns[$name] = ucwords($name);
+			$columns[$name] = ucwords($name);
 
 		endforeach;
 		
-		// $query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s",$this->form_name);
+		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s",$form_name);
 
-		// $this->total_items = $wpdb->query($query);
+		$csv = '';
+
+		foreach($data as $row) :
+
+			$csv .= implode(',', $row);
+			$csv .= "\n";
+
+		endforeach;
 
 
-	 //  $hidden = array('submit_id');
+		return array('csv'=>$csv,'headers'=>implode(',',$columns) . "\n");
 
-		// //Set columns to include checkbox column
-		// $this->columns = array('cb'=>'<input type="checkbox">') + $this->columns;
-
-
-
-
-	 //  $this->_column_headers = array($this->columns, $hidden, $sortable);
 	 //  $this->items = $this->data;
 
 		// /* -- Register the pagination -- */
