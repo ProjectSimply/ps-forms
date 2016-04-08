@@ -44,6 +44,23 @@ class Ps_forms_admin {
 	 */
 	private function __construct() {
 
+
+		if(isset($_GET['csv']))
+		{
+			$csv = $this->generate_csv();
+
+			header("Pragma: public");
+			header("Expires: 0");
+			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+			header("Cache-Control: private", false);
+			header("Content-Type: application/octet-stream");
+			header("Content-Disposition: attachment; filename=\"report.csv\";" );
+			header("Content-Transfer-Encoding: binary");
+
+			echo $csv; die;
+
+		}
+
 		// Call $plugin_slug from initial plugin class. TODO: Rename "Plugin_Name" to the name of your initial plugin class
 		$plugin = Ps_forms::get_instance();
 		$this->plugin_slug = $plugin->get_plugin_slug();
@@ -144,6 +161,80 @@ class Ps_forms_admin {
 
 
 	/**
+	 * Make the csv 
+	 *
+	 * @since     1.0.0
+	 *
+	 * @return    null    
+	 */
+	public function generate_csv() {
+
+		global $wpdb;
+
+		$form_name = $_GET['form_name'];
+
+		//Select all submit ids for further querying
+		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s ORDER BY submit_id DESC",$form_name);
+
+		$result = $wpdb->get_results($query,ARRAY_A);
+
+		$submit_ids = array();
+
+		foreach($result as $s) :
+			$submit_ids[] = $s['submit_id'];
+		endforeach;
+
+		$query = $wpdb->prepare("SELECT submit_id, name, value, time FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s AND submit_id IN(" . implode(',',$submit_ids) . ") ORDER BY submit_id DESC", $form_name);
+		
+		$result = $wpdb->get_results($query);
+
+		$this->data = array();
+		$this->columns = array('submitted'=>'Submitted');
+
+		foreach($result as $row) : 
+
+			$name = $row->name;
+			$date = new DateTime($row->time);
+			$data[$row->submit_id]['submitted'] 		= $date->format('d-m-Y \a\t H:i');
+			$data[$row->submit_id]['submit_id'] 		= $row->submit_id;
+			$data[$row->submit_id][$name]	 			= $row->value;
+			if(sizeof($this->columns) < 7)
+				$this->columns[$name] = ucwords($name);
+
+		endforeach;
+		
+		// $query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s",$this->form_name);
+
+		// $this->total_items = $wpdb->query($query);
+
+
+	 //  $hidden = array('submit_id');
+
+		// //Set columns to include checkbox column
+		// $this->columns = array('cb'=>'<input type="checkbox">') + $this->columns;
+
+
+
+
+	 //  $this->_column_headers = array($this->columns, $hidden, $sortable);
+	 //  $this->items = $this->data;
+
+		// /* -- Register the pagination -- */
+		// $this->set_pagination_args( array(
+		// 	"total_items" => $this->total_items,
+		// 	"total_pages" => ceil($this->total_items/10),
+		// 	"per_page" => 10,
+		// ) );
+
+		// //The pagination links are automatically built according to those parameters
+
+
+		// return 'penis';
+
+	}
+
+
+	/**
 	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
 	 *
 	 * @since    1.0.0
@@ -192,7 +283,9 @@ class Ps_forms_admin {
 	 * @since    1.0.0
 	 */
 	public function display_plugin_entries_page() {
-
+		if($_GET['csv']) {
+			print_r('die'); 
+		}
 		include_once( 'views/entries.php' );
 	}
 

@@ -44,6 +44,9 @@
 	<?php endif; ?>
 
 
+	<a href="<?php echo admin_url('?page=ps-form-entries&form_name='. stripslashes($_GET['form_name']) .'&csv=1' ) ?>">Download CSV</a>
+
+
 	<form id="ps-entries-form-main" method="post">
 
 		<?php Ps_forms_admin::get_entries_table($current_form_name); ?>
