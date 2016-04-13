@@ -54,10 +54,10 @@ class Ps_forms_admin {
 			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 			header("Cache-Control: private", false);
 			header("Content-Type: application/octet-stream");
-			header("Content-Disposition: attachment; filename=\"" . $_GET['form_name'] . " report.csv\";" );
+			header("Content-Disposition: attachment; filename=\"" . 'My Contact Form' . " report.csv\";" );
 			header("Content-Transfer-Encoding: binary");
 
-			echo $csv['headers'] . $csv['csv']; die;
+			echo $csv['headers'] .$csv['csv']; die;
 
 		}
 
@@ -173,6 +173,15 @@ class Ps_forms_admin {
 
 		$form_name = $_GET['form_name'];
 
+
+		if(!$form_name) :
+
+			$result = $wpdb->get_row("SELECT form_name FROM `{$wpdb->prefix}ps_forms_settings`");
+			$form_name = $result->form_name;
+
+		endif;
+
+
 		//Select all submit ids for further querying
 		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s ORDER BY submit_id DESC",$form_name);
 
@@ -196,38 +205,28 @@ class Ps_forms_admin {
 			$name = $row->name;
 			$date = new DateTime($row->time);
 			$data[$row->submit_id]['submitted'] 		= $date->format('d-m-Y \a\t H:i');
-			$data[$row->submit_id][$name]	 			= $row->value;
+			$data[$row->submit_id][$name]	 			= str_replace("\n",' ',str_replace(',','',$row->value));
 			$columns[$name] = ucwords($name);
 
 		endforeach;
 		
+
+
 		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s",$form_name);
 
 		$csv = '';
 
+
 		foreach($data as $row) :
 
-			$csv .= implode(',', $row);
+			$organisedRow = array_merge($columns,$row);
+			$csv .= implode(',', $organisedRow);
 			$csv .= "\n";
-
 		endforeach;
 
 
+
 		return array('csv'=>$csv,'headers'=>implode(',',$columns) . "\n");
-
-	 //  $this->items = $this->data;
-
-		// /* -- Register the pagination -- */
-		// $this->set_pagination_args( array(
-		// 	"total_items" => $this->total_items,
-		// 	"total_pages" => ceil($this->total_items/10),
-		// 	"per_page" => 10,
-		// ) );
-
-		// //The pagination links are automatically built according to those parameters
-
-
-		// return 'penis';
 
 	}
 
