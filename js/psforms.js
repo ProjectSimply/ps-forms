@@ -253,6 +253,9 @@
 
                 //Successful submission!
                 show_error_notice('success',data.message);
+                 if(typeof(__ss_noform) != 'undefined') {
+                  __ss_noform.push(['submit', null, $(thisform).attr('data-ss-code')]);
+                }
 
                 //reset inputs
                 $('input, textarea, select',thisform).not(':input[type=button], :input[type=hidden], :input[type=submit], :input[type=reset]').removeClass('success').val('');
