@@ -190,9 +190,10 @@
       };
 
       e.preventDefault();
-
+     
       var thisform = $(this), 
           thisName = $(thisform).children(':input[type=hidden]').attr('value');
+      
 
       //Loop all the inputs
       $('input, textarea, select',thisform).not(':input[type=button], :input[type=submit], :input[type=reset]').each(function(i,elem){
@@ -216,6 +217,7 @@
         'url'       : ajaxURL,
         'data'      : postdata,
         'success'   : function(data) {
+
 
           if( data.errors ){
 
@@ -251,22 +253,39 @@
 
           } else {
 
-                //Successful submission!
-                show_error_notice('success',data.message);
-                 if(typeof(__ss_noform) != 'undefined') {
-                  __ss_noform.push(['submit', null, $(thisform).attr('data-ss-code')]);
+              // create and dispatch event
+              var event = new CustomEvent("psFormSubmit", {
+                bubbles : true,
+                  detail: {
+                    form  : thisform
+                  }
+              });
+
+
+              if($(thisform).attr('id')){
+                document.querySelector('#' + $(thisform).attr('id')).dispatchEvent(event);
+              }
+
+
+              // check here for the suppressSuccessMessage data variable on the form. 
+              // If it's not, then go ahead and show success message
+               if(!$(thisform).attr('data-suppressSuccessMessage')){
+
+                  //Successful submission!
+                  show_error_notice('success',data.message);
+                   if(typeof(__ss_noform) != 'undefined') {
+                    __ss_noform.push(['submit', null, $(thisform).attr('data-ss-code')]);
+                  }
+
+                  //reset inputs
+                  $('input, textarea, select',thisform).not(':input[type=button], :input[type=hidden], :input[type=submit], :input[type=reset]').removeClass('success').val('');
+                  $('.active',thisform).removeClass('active');
+
+                  //reset validation
+                  $('input, ps-input-holder',thisform).removeClass('error success');
+                  $('.ps-validation').attr('class','ps-validation').html('');
+                  $('.ps-error-message').attr('class','ps-error-message').html('');
                 }
-
-                //reset inputs
-                $('input, textarea, select',thisform).not(':input[type=button], :input[type=hidden], :input[type=submit], :input[type=reset]').removeClass('success').val('');
-                $('.active',thisform).removeClass('active');
-
-                //reset validation
-                $('input, ps-input-holder',thisform).removeClass('error success');
-                $('.ps-validation').attr('class','ps-validation').html('');
-                $('.ps-error-message').attr('class','ps-error-message').html('');
-
-             
 
           }
         }
