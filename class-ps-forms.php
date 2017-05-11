@@ -636,6 +636,21 @@ class Ps_forms {
 			'message' => $success_message
 		);
 
+
+		//Mailchimp actions
+
+		$MailChimp = new \Drewm\MailChimp('put in id here');
+
+		$result = $MailChimp->call('lists/subscribe', array(
+		                'id'                => 'id of list here',
+		                'email'             => array('email'=>$recipient_email_address),
+		                'double_optin'      => false,
+		                'update_existing'   => true,
+		                'replace_interests' => false,
+		                'send_welcome'      => false
+		            ));
+
+
 		if($ajax == true)
 			echo(json_encode($data));
 		else
