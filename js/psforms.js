@@ -9,6 +9,8 @@
 
       init_multipage();
 
+      getMailchimpMergeTags();
+
     });
 
     var oldSubmitMessages = {};
@@ -202,7 +204,8 @@
         if($(this).attr('type') == 'checkbox' || $(this).attr('type') == 'radio')
           val = prepare_multiples($(elem).attr('name'),thisform);
 
-        postdata['inputs'][$(elem).attr('name')] = val;
+        postdata['inputs'][$(elem).attr('name')] = {'value': val, 'mc': $(this).attr('data-ps-mc-tag')};
+
       });
 
       $('input[type=radio]:not(:checked),input[type=checkbox]:not(:checked)',thisform).each(function(i,elem){
@@ -292,6 +295,33 @@
       });
 
     });
+
+
+    function getMailchimpMergeTags(){
+
+      var mailchimpMergeTags = [];
+
+      $('input[data-mailchimp-merge-tag]').each(function(){
+        mailchimpMergeTags.push($(this).attr('data-mailchimp-merge-tag'));
+      });
+
+      var postdata = {
+        'action'    : 'ps_get_mailchimp_merge_tags',
+        'data'      : JSON.stringify(mailchimpMergeTags),
+      };
+
+      $.ajax({
+            'type'      : 'POST',
+            'dataType'  : 'json',
+            'url'       : ajaxURL,
+            'data'      : postdata,
+            'success'   : function(data) {
+              console.log('success');
+            }
+
+        });
+
+    }
   
     //Let's get our multpage forms cooking
     var init_multipage = function() {

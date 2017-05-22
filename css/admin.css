@@ -40,7 +40,7 @@ input[type="submit"].ps-forms-button {
 	text-decoration: none;
 }
 
-#ps_forms_settings, #ps_submission_settings, #ps_default_validation_messages {
+#ps_forms_settings, #ps_submission_settings, #ps_default_validation_messages, #ps_mailchimp_api_section {
 	margin-bottom: 15px;
 }
 

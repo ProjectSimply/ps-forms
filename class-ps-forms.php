@@ -16,6 +16,9 @@
  * @package Ps_forms
  * @author  Michael Watson <michael@projectsimply.com>
  */
+
+require_once(dirname(__FILE__) . '/vendor/MailChimp.php');
+
 class Ps_forms {
 
 	const VERSION = '1.1.0';
@@ -220,6 +223,13 @@ class Ps_forms {
 				  form_name tinytext NOT NULL,
 			      UNIQUE KEY id (id)
 	  		  );
+
+	  		  CREATE TABLE {$wpdb->prefix}ps_forms_global_settings (
+				  id mediumint(9) NOT NULL AUTO_INCREMENT,
+				  option_name tinytext,
+				  option_value tinytext,
+			      UNIQUE KEY id (id)
+	  		  );
 		      
 		      CREATE TABLE {$wpdb->prefix}ps_forms_validation_messages (
 			  id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -267,7 +277,7 @@ class Ps_forms {
 
 	   //For debugging, remove everything
 	   //What to do with a deactivate? I'm not sure
-	   $sql = 	"DROP TABLE IF EXISTS {$wpdb->prefix}ps_form_data, {$wpdb->prefix}ps_forms_validation_rules, {$wpdb->prefix}ps_forms_settings, {$wpdb->prefix}ps_forms_validation_messages";
+	   $sql = 	"DROP TABLE IF EXISTS {$wpdb->prefix}ps_form_data, {$wpdb->prefix}ps_forms_validation_rules, {$wpdb->prefix}ps_forms_global_settings, {$wpdb->prefix}ps_forms_settings, {$wpdb->prefix}ps_forms_validation_messages";
 	   //";
 
 	   $wpdb->query( $sql );
@@ -395,6 +405,7 @@ class Ps_forms {
 		die;
 	}
 
+
 	public function ps_forms_validate_data($inputs = null, $ajax = true) {
 
 		//These are temporary. Need to be settings
@@ -425,13 +436,21 @@ class Ps_forms {
 		unset($inputs['ps-submit']);
 		unset($inputs['ps-form-name']);
 
+		//Temp merge vars for Mailchimp
+		$merge_vars = array();
 
 		//Remove our prefixes
 		$temp = array();
+
 		foreach($inputs as $key => $input) :
 
 			$key = str_replace('ps-', '', $key);
-			$temp[$key] = $input;
+			$temp[$key] = $input['value'];
+
+			// if we have any fields that are to be integrated with mailchimp, we add them to the $merge_vars array
+			if($input['mc']){
+				$merge_vars[$input['mc']] = $input['value'];
+			}
 
 		endforeach;
 
@@ -467,7 +486,7 @@ class Ps_forms {
 
 		//Let's do a flood check
 		$ip = $_SERVER['REMOTE_ADDR'];
-		$last_submit = $wpdb->get_row("SELECT time AS latest_time FROM {$wpdb->prefix}ps_form_data WHERE ip='$ip' AND time > NOW() - INTERVAL 1 MINUTE");
+		$last_submit = $wpdb->get_row("SELECT time AS latest_time FROM {$wpdb->prefix}ps_form_data WHERE ip='$ip' AND time > NOW() - INTERVAL 1 SECOND");
 		
 		if($last_submit) :
 
@@ -586,6 +605,7 @@ class Ps_forms {
 		require_once( plugin_dir_path( __FILE__ ) . 'class-ps-forms-admin.php' );
 		$settings = Ps_forms_admin::get_form_settings($form_name );
 
+
 		//Set some defaults
 		$html_file = dirname(__FILE__) . '/email-templates/default.html';
 		$css_file = dirname(__FILE__) . '/email-templates/default.css';
@@ -625,7 +645,6 @@ class Ps_forms {
 		$email_html = $email_html->convert();
 
 		//With our magnificently created table data, we can insert this into the database and send as an email.
-
 		$wpdb->query($query);
 
 		//Send email
@@ -637,18 +656,26 @@ class Ps_forms {
 		);
 
 
-		//Mailchimp actions
+		//Mailchimp bits
+		$mailchimp_api_key = Ps_forms_admin::get_mailchimp_api_key();
 
-		$MailChimp = new \Drewm\MailChimp('put in id here');
+		if($mailchimp_api_key && isset($inputs['Email'])) :
 
-		$result = $MailChimp->call('lists/subscribe', array(
-		                'id'                => 'id of list here',
-		                'email'             => array('email'=>$recipient_email_address),
-		                'double_optin'      => false,
-		                'update_existing'   => true,
-		                'replace_interests' => false,
-		                'send_welcome'      => false
-		            ));
+			$MailChimp = new \Drewm\MailChimp($mailchimp_api_key);
+
+			$mailchimpListId = $inputs['mailchimp-list-id'];
+
+			$result = $MailChimp->call('lists/subscribe', array(
+			                'id'                => $mailchimpListId,
+			                'email'             => array('email'=>$inputs['Email']),
+			                'merge_vars'		=> $merge_vars,
+			                'double_optin'      => false,
+			                'update_existing'   => true,
+			                'replace_interests' => false,
+			                'send_welcome'      => false
+			            ));
+
+		endif;
 
 
 		if($ajax == true)
@@ -659,11 +686,13 @@ class Ps_forms {
 		
 	}
 
+
 	private static function ps_forms_validate_required($value=null) {
 		if(!$value)
 			return false;
 		return true;
 	}
+
 
 	private static function ps_forms_validate_email($value=null) {
 		if(!filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -680,6 +709,7 @@ class Ps_forms {
 		return true;
 	}
 
+
 	private static function ps_forms_validate_is_phone($value=null){
 
 	     $stripped_value = preg_replace("/[^0-9]/", "", $value);
@@ -690,6 +720,7 @@ class Ps_forms {
 	        endif;
 	    endif;
 	}
+
 
 	private static function ps_forms_validate_is_mobile($value=null){
 
@@ -704,6 +735,7 @@ class Ps_forms {
 	    return false;
 	}
 
+
 	public function get_validation_rules($form_name='') {
 
 		global $wpdb;
@@ -716,8 +748,8 @@ class Ps_forms {
 		endforeach;
 
 		return $return;
+	}
 
-	} 
 
 	public function get_default_validation_messages() {
 		global $wpdb;
@@ -730,8 +762,8 @@ class Ps_forms {
 		endforeach;
 
 		return $return;
-
 	}
+
 
 	//This is the nonjs fallback
 	public function js_fallback_check()

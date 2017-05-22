@@ -14,6 +14,9 @@
 ?>
 
 <?php //At the page load
+
+$mailchimp_api_key = Ps_forms_admin::get_mailchimp_api_key();
+
 if( isset( $_POST["submit"])) : ?>
     
     <?php if($message = Ps_forms_admin::set_form_settings($_POST)) : ?>
@@ -21,7 +24,19 @@ if( isset( $_POST["submit"])) : ?>
     	<div id="message" class="updated"><p><?php echo $message; ?></p></div>
 
     <?php endif ?>
+	
 
+    <?php 
+
+    	if($_POST["mailchimp-api-key"] && $_POST["mailchimp-api-key"] != $mailchimp_api_key) : 
+
+    		Ps_forms_admin::set_mailchimp_api_key($_POST["mailchimp-api-key"]);
+    		$mailchimp_api_key = $_POST["mailchimp-api-key"];
+    	endif;
+
+    ?>
+
+	
 <?php endif; ?>
 
 <div class="wrap">
@@ -42,8 +57,8 @@ if( isset( $_POST["submit"])) : ?>
 
 						<label>Pick a form to edit: </label>
 
-						<?php $current_form_name = stripslashes($_GET['form_name']); ?>
-						<?php if($_POST['new_form']) $current_form_name = $_POST['new_form']; ?>
+						<?php $current_form_name = isset($_GET['form_name']) ? stripslashes($_GET['form_name']) : ''; ?>
+						<?php if(isset($_POST['new_form'])) $current_form_name = $_POST['new_form']; ?>
 
 						<select name="form_name" id="form_name_select">
 
@@ -106,7 +121,7 @@ if( isset( $_POST["submit"])) : ?>
 
 										<td class="custom-message">
 
-											<input type="text" placeholder="Optional message" name="custom-message[<?php echo $i; ?>]" value="<?php echo $validation_rule->message; ?>">
+											<input type="text" placeholder="Optional message" name="custom-message[<?php echo $i; ?>]" value="<?php echo isset($validation_rule->message) ? $validation_rule->message : ''; ?>">
 
 										</td>
 										<td class="add">
@@ -180,10 +195,55 @@ if( isset( $_POST["submit"])) : ?>
 
 		</tbody>
 	</table>
+	
+	
+	<table class="widefat" id="ps_mailchimp_api_section">
+		<tbody>
+
+			<tr>
+				<td class="label">
+					<h3>Mailchimp API Key</h3>
+					<p>Here you can enter the Mailchimp API key for the account that you'd like to save your form data to. You can find it under the "Account --> Extras --> API keys" section of the Mailchimp admin area.</p>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>
+					<div class="ps_forms_validation_messages">
+
+						<table>
+							<tbody id="validation_message_wrap">
+
+								<tr>
+
+									<td class="label">
+										<label for="mailchimp-api-key">Mailchimp API Key</label>
+									</td>
+
+									<td>
+										<input type="text" name="mailchimp-api-key" value="<?php echo $mailchimp_api_key; ?>">
+									</td>
+
+								</tr>
+
+							</tbody>
+						</table>
+
+						<input type="submit" class="ps-forms-button" name="submit" value="Save Options">
+					</div>
+				
+				</td>
+			</tr>
+
+		</tbody>
+	</table>
+
 
 	<?php if($current_form_name) : ?>
-
+		
 		<?php $settings = Ps_forms_admin::get_form_settings( $current_form_name ); ?>
+
+		
 
 		<table class="widefat" id="ps_submission_settings">
 			<tbody>

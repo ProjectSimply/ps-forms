@@ -371,12 +371,14 @@ class Ps_forms_admin {
 	public function set_form_settings($data) {
 		global $wpdb;
 
-		$form_name = $data['form_name'];
+		$form_name 			= $data['form_name'];
 		if($data['new_form'])
-			$form_name = $data['new_form'];
-		$names = $data['name'];
-		$rules = $data['validation_rule'];
-		$message = $data['custom-message'];
+			$form_name 	= $data['new_form'];
+
+		$names 				= $data['name'];
+		$rules 				= $data['validation_rule'];
+		$message 			= $data['custom-message'];
+
 		
 		$result = $wpdb->get_results($wpdb->prepare("SELECT name,rule FROM {$wpdb->prefix}ps_forms_validation_rules WHERE form_name=%s",$form_name));
 		
@@ -461,8 +463,23 @@ class Ps_forms_admin {
 
 		return "Form rules have been updated. You're the best.";
 
+	}
+
+
+	// sets the mailchimp_api_key field in the ps_forms_settings table
+	public function set_mailchimp_api_key($mailchimp_api_key){
+		global $wpdb;
+
+		// delete 'mailchimp_api_key' row from table
+		$query = $wpdb->prepare("DELETE FROM {$wpdb->prefix}ps_forms_global_settings WHERE option_name=%s", 'mailchimp_api_key');
+		$wpdb->query($query);
+
+		// add new 'mailchimp_api_key'
+		$query = $wpdb->prepare( "INSERT INTO {$wpdb->prefix}ps_forms_global_settings  (option_name, option_value) VALUES (%s, %s)", 'mailchimp_api_key', $mailchimp_api_key );
+		$wpdb->query($query);
 
 	}
+
 
 	//Return all form validation rules from the database
 	//Returns an array of fields
@@ -501,6 +518,18 @@ class Ps_forms_admin {
 	}
 
 
+	public function get_mailchimp_api_key() {
+		global $wpdb;
+
+		if($result = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}ps_forms_global_settings WHERE option_name = 'mailchimp_api_key'")){
+
+			return $result->option_value;
+		}
+		
+		return false;
+	}
+
+
 	//Get the current default validation message
 	//For this validation rule.
 	public function get_default_validation_message($rule) {
@@ -513,6 +542,7 @@ class Ps_forms_admin {
 
 
 	}
+
 
 	//Try and find custom html and css files to use for templating
 	public function get_custom_email_templates() {
