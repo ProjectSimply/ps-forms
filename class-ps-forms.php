@@ -427,7 +427,7 @@ class Ps_forms {
 			$inputs = $_GET['inputs'];
 		}
 
-		$form_name = $inputs['ps-form-name'];
+		$form_name = $inputs['ps-form-name']['value'];
 
 		//Get validation rules for this form
 		$validation_rules = self::get_validation_rules($form_name);
