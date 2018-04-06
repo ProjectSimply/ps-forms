@@ -5,11 +5,11 @@
  *
  * This file is used to markup the admin-facing aspects of the plugin.
  *
- * @link       http://example.com
- * @since      1.0.0
+ * @link       https://projectsimply.com
+ * @since      2.0.0
  *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/admin/partials
+ * @package    ps-forms
+ * @subpackage ps-forms/admin/partials
  */
 ?>
 

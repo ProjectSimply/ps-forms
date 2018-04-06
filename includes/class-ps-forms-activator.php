@@ -3,11 +3,11 @@
 /**
  * Fired during plugin activation
  *
- * @link       http://example.com
- * @since      1.0.0
+ * @link       https://projectsimply.com
+ * @since      2.0.0
  *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
+ * @package    ps-forms
+ * @subpackage ps-forms/includes
  */
 
 /**
@@ -15,19 +15,19 @@
  *
  * This class defines all code necessary to run during the plugin's activation.
  *
- * @since      1.0.0
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
- * @author     Your Name <email@example.com>
+ * @since      2.0.0
+ * @package    ps-forms
+ * @subpackage ps-forms/includes
+ * @author     Michael Watson michael@projectsimply.com
  */
-class Plugin_Name_Activator {
+class PS_Forms_Activator {
 
 	/**
 	 * Short Description. (use period)
 	 *
 	 * Long Description.
 	 *
-	 * @since    1.0.0
+	 * @since    2.0.0
 	 */
 	public static function activate() {
 

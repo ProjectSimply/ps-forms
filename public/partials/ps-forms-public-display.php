@@ -5,11 +5,11 @@
  *
  * This file is used to markup the public-facing aspects of the plugin.
  *
- * @link       http://example.com
- * @since      1.0.0
+ * @link       https://projectsimply.com
+ * @since      2.0.0
  *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/public/partials
+ * @package    ps-forms
+ * @subpackage ps-forms/public/partials
  */
 ?>
 
