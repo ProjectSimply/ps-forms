@@ -74,7 +74,7 @@ class PS_Forms {
 			$this->version = '2.0.0';
 		}
 
-		$this->ps_forms = 'ps-forms';
+		$this->plugin_name = 'psForms';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -153,7 +153,7 @@ class PS_Forms {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-
+        
 		$plugin_admin = new PS_Forms_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
@@ -194,6 +194,7 @@ class PS_Forms {
 	 * @return    string    The name of the plugin.
 	 */
 	public function get_plugin_name() {
+        
 		return $this->plugin_name;
 	}
 
