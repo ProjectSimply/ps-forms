@@ -50,7 +50,23 @@ class PS_Forms_Admin {
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+        $this->version = $version;
+        
+        if(isset($_GET['csv']))
+		{
+			$csv = $this->generate_csv();
+
+			header("Pragma: public");
+			header("Expires: 0");
+			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+			header("Cache-Control: private", false);
+			header("Content-Type: application/octet-stream");
+			header("Content-Disposition: attachment; filename=\"" . 'My Contact Form' . " report.csv\";" );
+			header("Content-Transfer-Encoding: binary");
+
+			echo $csv['headers'] .$csv['csv']; die;
+
+		}
 
 	}
 
@@ -97,6 +113,74 @@ class PS_Forms_Admin {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ps-forms-admin.js', array( 'jquery' ), $this->version, false );
+
+    }
+    
+
+    /**
+	 * Make the csv 
+	 *
+	 * @since     2.0.0
+	 *
+	 * @return    null    
+	 */
+	public function generate_csv() {
+
+		global $wpdb;
+
+		$form_name = $_GET['form_name'];
+
+
+		if(!$form_name) :
+
+			$result = $wpdb->get_row("SELECT form_name FROM `{$wpdb->prefix}ps_forms_settings`");
+			$form_name = $result->form_name;
+
+		endif;
+
+
+		//Select all submit ids for further querying
+		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s ORDER BY submit_id DESC",$form_name);
+
+		$result = $wpdb->get_results($query,ARRAY_A);
+
+		$submit_ids = array();
+
+        foreach($result as $s) :
+            
+            $submit_ids[] = $s['submit_id'];
+            
+		endforeach;
+
+		$query = $wpdb->prepare("SELECT submit_id, name, value, time FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s AND submit_id IN(" . implode(',',$submit_ids) . ") ORDER BY submit_id DESC", $form_name);
+		
+		$result = $wpdb->get_results($query);
+
+		$data       = array();
+		$columns    = array('submitted'=>'Submitted');
+
+		foreach($result as $row) : 
+
+			$name = $row->name;
+			$date = new DateTime($row->time);
+			$data[$row->submit_id]['submitted'] 		= $date->format('d-m-Y \a\t H:i');
+			$data[$row->submit_id][$name]	 			= str_replace("\n",' ',str_replace(',','',$row->value));
+			$columns[$name] = ucwords($name);
+
+		endforeach;
+
+		$query = $wpdb->prepare("SELECT DISTINCT submit_id FROM `{$wpdb->prefix}ps_form_data` WHERE {$wpdb->prefix}ps_form_data.form_name = %s",$form_name);
+
+		$csv = '';
+
+		foreach($data as $row) :
+
+			$organisedRow = array_merge($columns,$row);
+			$csv .= implode(',', $organisedRow);
+			$csv .= "\n";
+		endforeach;
+
+		return array('csv'=>$csv,'headers'=>implode(',',$columns) . "\n");
 
 	}
 
